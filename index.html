@@ -1,0 +1,1255 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1023">
+  <title>TaekKkuTu — 택끄투</title>
+  <style>
+    :root {
+      --ink: #eef2ff;
+      --muted: #9da9c9;
+      --panel: rgba(17, 27, 57, .74);
+      --panel-solid: #131e3f;
+      --line: rgba(180, 198, 255, .15);
+      --cyan: #57e5ff;
+      --violet: #9b7bff;
+      --pink: #ff78b8;
+      --green: #74f2b3;
+      --orange: #ffc66d;
+      --danger: #ff7f91;
+      --shadow: 0 26px 70px rgba(0, 0, 0, .33);
+    }
+
+    * { box-sizing: border-box; }
+    button { font: inherit; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 5%, rgba(105, 77, 233, .33), transparent 27rem),
+        radial-gradient(circle at 87% 75%, rgba(20, 195, 230, .18), transparent 24rem),
+        linear-gradient(135deg, #080d1e 0%, #0c1530 45%, #09152a 100%);
+      letter-spacing: -.02em;
+      overflow-x: hidden;
+    }
+
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      pointer-events: none;
+      border-radius: 50%;
+      filter: blur(1px);
+      opacity: .55;
+    }
+    body::before {
+      width: 36rem; height: 36rem; right: -15rem; top: 3rem;
+      background: radial-gradient(circle, rgba(123, 86, 255, .18), transparent 67%);
+    }
+    body::after {
+      width: 28rem; height: 28rem; left: -12rem; bottom: -8rem;
+      background: radial-gradient(circle, rgba(58, 215, 255, .11), transparent 67%);
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+      position: relative;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      font-weight: 900; font-size: 21px; color: #071426;
+      border-radius: 14px;
+      background: conic-gradient(from 210deg, var(--cyan), #c3f7ff, var(--violet), var(--cyan));
+      box-shadow: 0 8px 28px rgba(72, 205, 255, .35);
+    }
+    .brand-name { font-weight: 900; font-size: 16px; letter-spacing: .09em; }
+    .brand-name small { display: block; font-size: 10px; letter-spacing: .17em; color: var(--muted); margin-top: 2px; }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+
+    .icon-button, .ghost-button {
+      cursor: pointer; color: var(--muted); border: 1px solid var(--line);
+      background: rgba(255,255,255,.035); transition: .2s ease;
+    }
+    .icon-button {
+      width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+      font-size: 17px;
+    }
+    .icon-button:hover, .ghost-button:hover { color: var(--ink); background: rgba(255,255,255,.09); border-color: rgba(160, 230, 255, .38); transform: translateY(-1px); }
+    .icon-button.active { color: var(--cyan); border-color: rgba(87, 229, 255, .5); box-shadow: inset 0 0 16px rgba(87,229,255,.08); }
+
+    .layout { display: grid; grid-template-columns: 285px minmax(0, 1fr) 260px; gap: 18px; align-items: start; }
+    .card {
+      background: linear-gradient(145deg, rgba(28, 40, 80, .86), rgba(12, 21, 48, .79));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .profile { padding: 22px; }
+    .eyebrow { color: var(--cyan); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+    .profile-top { display: flex; gap: 13px; align-items: center; margin: 10px 0 17px; }
+    .level-orb {
+      width: 58px; height: 58px; flex: none; border-radius: 50%; display: grid; place-items: center;
+      position: relative; font-size: 19px; font-weight: 900; color: #0b1831;
+      background: linear-gradient(135deg, #a9f8ff, #61e5ff 46%, #9f80ff);
+      box-shadow: 0 0 0 4px rgba(108, 221, 255, .1), 0 10px 28px rgba(64, 222, 255, .21);
+    }
+    .level-orb::after { content: "LV"; position: absolute; top: 8px; font-size: 8px; letter-spacing: .08em; }
+    .level-orb span { padding-top: 9px; }
+    .profile-name { font-weight: 800; font-size: 18px; }
+    .profile-rank { color: var(--muted); font-size: 12px; margin-top: 3px; }
+    .progress-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-bottom: 7px; }
+    .progress-track { width: 100%; height: 8px; overflow: hidden; border-radius: 99px; background: rgba(0,0,0,.25); }
+    .progress-fill { height: 100%; border-radius: inherit; width: 0; transition: width .5s cubic-bezier(.2,.8,.2,1); background: linear-gradient(90deg, var(--cyan), var(--violet), #d189ff); box-shadow: 0 0 18px rgba(113, 169, 255, .9); }
+    .rank-note { font-size: 11px; color: #b7c5ea; margin: 10px 0 21px; min-height: 17px; }
+
+    .section-label { font-size: 11px; color: var(--muted); font-weight: 750; letter-spacing: .06em; margin: 0 0 11px; text-transform: uppercase; }
+    .symbol-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .symbol-option {
+      min-height: 46px; border-radius: 12px; border: 1px solid var(--line); color: var(--muted);
+      background: rgba(255,255,255,.025); cursor: pointer; font-weight: 800; transition: .2s;
+    }
+    .symbol-option span { font-size: 18px; margin-right: 6px; }
+    .symbol-option:hover { color: var(--ink); }
+    .symbol-option.selected { color: var(--cyan); border-color: rgba(87,229,255,.5); background: rgba(87,229,255,.09); box-shadow: inset 0 0 18px rgba(87,229,255,.07); }
+    .mini-divider { height: 1px; background: var(--line); margin: 21px 0; }
+
+    .legend { display: grid; gap: 11px; }
+    .legend-row { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); }
+    .legend-row b { color: var(--ink); font-weight: 750; }
+    .legend-row .dot { width: 7px; height: 7px; display: inline-block; vertical-align: 1px; border-radius: 50%; margin-right: 6px; }
+
+    .game-card { min-height: 590px; padding: 22px; overflow: hidden; position: relative; }
+    .game-card::before { content: ""; position: absolute; width: 360px; height: 190px; top: -140px; left: 50%; transform: translateX(-50%); background: radial-gradient(ellipse, rgba(97, 90, 255, .23), transparent 68%); pointer-events: none; }
+    .arena-head { display: flex; justify-content: space-between; align-items: flex-start; position: relative; gap: 12px; }
+    .arena-caption { font-size: 11px; color: var(--muted); margin: 5px 0 0; }
+    .round-pill { border: 1px solid rgba(136,156,255,.2); background: rgba(119,126,255,.09); color: #c8d2ff; padding: 7px 10px; border-radius: 10px; font-size: 10px; font-weight: 800; letter-spacing: .06em; white-space: nowrap; }
+    .status {
+      position: relative; margin: 25px auto 19px; text-align: center; min-height: 52px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .status h2 { font-size: 18px; margin: 0; letter-spacing: -.04em; }
+    .status p { color: var(--muted); font-size: 12px; margin: 5px 0 0; }
+    .turn-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); vertical-align: 2px; margin-right: 6px; }
+    .turn-dot.ai { background: var(--pink); box-shadow: 0 0 10px var(--pink); }
+
+    .board-wrap { max-width: 416px; margin: 0 auto; position: relative; }
+    .board {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      padding: 12px; border-radius: 27px; position: relative;
+      background: rgba(3, 8, 26, .35); border: 1px solid rgba(170,192,255,.1);
+      box-shadow: inset 0 0 48px rgba(4,8,27,.31), 0 16px 35px rgba(0,0,0,.18);
+    }
+    .cell {
+      appearance: none; aspect-ratio: 1; border: 1px solid rgba(174,200,255,.12); border-radius: 18px;
+      display: grid; place-items: center; cursor: pointer; position: relative; overflow: hidden;
+      color: var(--ink); font-size: clamp(42px, 8vw, 66px); line-height: 1; font-family: ui-rounded, "Arial Rounded MT Bold", sans-serif; font-weight: 300;
+      background: linear-gradient(145deg, rgba(57,75,129,.38), rgba(17,28,62,.68));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 6px 12px rgba(0,0,0,.08);
+      transition: transform .16s ease, border-color .2s, background .2s;
+    }
+    .cell:not(:disabled):hover { transform: translateY(-2px) scale(1.015); border-color: rgba(105,229,255,.55); background: linear-gradient(145deg, rgba(61,106,166,.55), rgba(19,41,79,.83)); }
+    .cell:disabled { cursor: default; }
+    .cell::after { content: ""; width: 0; height: 0; position: absolute; border-radius: 50%; opacity: 0; background: rgba(126, 237, 255, .12); transition: .3s; }
+    .cell:not(:disabled):active::after { width: 140%; height: 140%; opacity: 1; }
+    .cell.x { color: var(--cyan); text-shadow: 0 0 25px rgba(87,229,255,.47); animation: mark-in .25s cubic-bezier(.2,.9,.25,1.3) both; }
+    .cell.o { color: #b796ff; text-shadow: 0 0 25px rgba(174,125,255,.45); animation: mark-in .25s cubic-bezier(.2,.9,.25,1.3) both; }
+    .cell.winner { border-color: rgba(115,246,184,.85); background: linear-gradient(145deg, rgba(79,197,163,.31), rgba(44,89,97,.62)); box-shadow: inset 0 0 25px rgba(89,244,178,.18), 0 0 17px rgba(78,239,174,.14); }
+    @keyframes mark-in { from { opacity: 0; transform: scale(.35) rotate(-10deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+
+    .board-footer { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; }
+    .primary-button {
+      border: 0; border-radius: 12px; min-height: 43px; padding: 0 17px; font-weight: 850; cursor: pointer; color: #06152b;
+      background: linear-gradient(135deg, #a9f7ff, #63dcff 45%, #a08aff); box-shadow: 0 9px 20px rgba(85,202,255,.2); transition: transform .18s, filter .18s;
+    }
+    .primary-button:hover { transform: translateY(-2px); filter: brightness(1.07); }
+    .ghost-button { min-height: 43px; padding: 0 13px; border-radius: 12px; font-size: 12px; font-weight: 750; }
+
+    .opponent { padding: 20px; }
+    .opponent-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .opponent-title h2 { margin: 0; font-size: 15px; }
+    .signal { display: inline-flex; align-items: center; gap: 5px; color: var(--green); font-size: 10px; font-weight: 750; }
+    .signal i { width: 6px; height: 6px; display: block; background: var(--green); border-radius: 50%; box-shadow: 0 0 9px var(--green); }
+    .ai-card {
+      border: 1px solid rgba(163,150,255,.28); border-radius: 16px; padding: 14px; margin-bottom: 14px;
+      background: linear-gradient(135deg, rgba(126,96,238,.16), rgba(246,116,187,.065));
+    }
+    .ai-label { font-size: 10px; color: #c7baff; letter-spacing: .12em; font-weight: 800; }
+    .ai-name { font-size: 21px; font-weight: 900; margin: 5px 0 4px; letter-spacing: -.05em; }
+    .ai-info { color: var(--muted); font-size: 11px; line-height: 1.55; margin: 0; }
+    .difficulty { display: grid; gap: 8px; }
+    .difficulty-button {
+      width: 100%; min-height: 52px; padding: 9px 10px; display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; text-align: left;
+      color: var(--muted); border: 1px solid var(--line); border-radius: 13px; background: rgba(255,255,255,.024); cursor: pointer; transition: .18s;
+    }
+    .difficulty-button:hover:not(:disabled) { border-color: rgba(160,180,255,.44); background: rgba(255,255,255,.06); }
+    .difficulty-button.selected { color: var(--ink); border-color: rgba(144,128,255,.69); background: rgba(126,96,238,.15); box-shadow: inset 0 0 19px rgba(140,115,255,.07); }
+    .difficulty-button:disabled { opacity: .48; cursor: not-allowed; }
+    .difficulty-button .level-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px rgba(116,242,179,.6); }
+    .difficulty-button[data-difficulty="normal"] .level-dot { background: var(--orange); box-shadow: 0 0 10px rgba(255,198,109,.6); }
+    .difficulty-button[data-difficulty="hard"] .level-dot { background: var(--pink); box-shadow: 0 0 10px rgba(255,120,184,.6); }
+    .difficulty-button strong { display: block; font-size: 12px; }
+    .difficulty-button small { font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+    .difficulty-button em { font-size: 9px; font-style: normal; color: #c5b8ff; white-space: nowrap; }
+    .difficulty-button.selected em { color: var(--cyan); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 20px; }
+    .stat { padding: 10px 5px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.025); text-align: center; }
+    .stat b { display: block; font-size: 18px; }
+    .stat span { display: block; color: var(--muted); font-size: 9px; margin-top: 3px; font-weight: 700; }
+    .stat.win b { color: var(--green); } .stat.draw b { color: var(--orange); } .stat.loss b { color: var(--pink); }
+    .streak-box { margin-top: 11px; padding: 11px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; background: rgba(255,178,89,.07); color: #f7d49b; font-size: 11px; }
+    .streak-box b { color: var(--orange); font-size: 15px; }
+
+    .evolution-note { color: var(--muted); font-size: 10px; line-height: 1.55; margin: -5px 0 10px; }
+    .evolution-list { display: grid; gap: 7px; }
+    .evolution-step {
+      display: grid; grid-template-columns: 26px 1fr auto; gap: 8px; align-items: center; min-height: 47px; padding: 7px 9px;
+      border-radius: 12px; border: 1px solid rgba(174,200,255,.09); background: rgba(255,255,255,.018); color: #7180a4; transition: .3s ease;
+    }
+    .evolution-icon { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; background: rgba(127,145,207,.1); font-size: 12px; }
+    .evolution-step strong { display: block; font-size: 11px; color: inherit; }
+    .evolution-step small { display: block; font-size: 9px; margin-top: 2px; color: #7785a8; }
+    .evolution-step em { font-style: normal; font-size: 9px; color: inherit; font-weight: 750; }
+    .evolution-step.active { color: #d7edff; border-color: rgba(91,225,255,.5); background: linear-gradient(100deg, rgba(87,229,255,.13), rgba(157,123,255,.08)); box-shadow: inset 0 0 17px rgba(87,229,255,.06); }
+    .evolution-step.active .evolution-icon { background: rgba(87,229,255,.2); color: var(--cyan); box-shadow: 0 0 14px rgba(87,229,255,.12); }
+    .evolution-step.cleared { color: #aeb9d8; }
+    .evolution-step.cleared .evolution-icon { color: var(--green); }
+
+    .badge-vault { margin-top: 18px; padding: 19px 20px 20px; }
+    .badge-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .badge-head h2 { font-size: 15px; margin: 0; }
+    .badge-count { color: var(--cyan); border: 1px solid rgba(87,229,255,.22); background: rgba(87,229,255,.06); padding: 5px 8px; font-size: 10px; border-radius: 8px; font-weight: 800; white-space: nowrap; }
+    .badges-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .badge {
+      min-height: 112px; padding: 11px 7px; text-align: center; border-radius: 15px; border: 1px solid rgba(174,200,255,.1);
+      background: rgba(255,255,255,.023); color: #687697; transition: .25s ease;
+    }
+    .badge-icon { width: 38px; height: 38px; margin: 0 auto 7px; display: grid; place-items: center; border-radius: 12px; font-size: 19px; background: rgba(133,148,194,.1); filter: grayscale(1); }
+    .badge strong { display: block; font-size: 10px; }
+    .badge small { display: block; margin-top: 4px; font-size: 9px; line-height: 1.25; color: inherit; }
+    .badge.unlocked { color: #d7e8ff; border-color: rgba(121,188,255,.32); background: linear-gradient(145deg, rgba(92,184,255,.12), rgba(151,107,255,.08)); }
+    .badge.unlocked .badge-icon { filter: none; background: linear-gradient(135deg, rgba(89,229,255,.3), rgba(158,126,255,.31)); box-shadow: 0 0 17px rgba(101,186,255,.17); }
+
+    .toast {
+      position: fixed; z-index: 30; left: 50%; bottom: 22px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+      padding: 11px 15px; color: var(--ink); border: 1px solid rgba(147,219,255,.25); border-radius: 12px;
+      background: rgba(10,19,43,.91); box-shadow: 0 14px 38px rgba(0,0,0,.38); font-size: 12px; transition: .25s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .modal {
+      position: fixed; z-index: 25; inset: 0; display: grid; place-items: center; padding: 18px;
+      background: rgba(3,8,22,.58); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal.show { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      width: min(370px, 100%); text-align: center; padding: 29px 25px 24px; border-radius: 25px; border: 1px solid rgba(157,193,255,.23);
+      background: linear-gradient(145deg, #1a2855, #0e1738); box-shadow: 0 28px 70px rgba(0,0,0,.44); transform: translateY(12px) scale(.97); transition: .22s ease;
+    }
+    .modal.show .modal-card { transform: translateY(0) scale(1); }
+    .result-icon { width: 66px; height: 66px; margin: 0 auto 13px; display: grid; place-items: center; font-size: 31px; border-radius: 50%; background: rgba(87,229,255,.11); border: 1px solid rgba(87,229,255,.36); }
+    .modal-card h2 { margin: 0; font-size: 24px; letter-spacing: -.05em; }
+    .modal-card p { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 9px auto 20px; }
+    .xp-earned { color: var(--green); font-weight: 850; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .modal-actions .primary-button, .modal-actions .ghost-button { width: 100%; }
+
+    .burst { pointer-events: none; position: fixed; inset: 0; z-index: 40; overflow: hidden; }
+    .spark { position: absolute; width: 7px; height: 12px; border-radius: 2px; left: 50%; top: 47%; animation: burst .85s cubic-bezier(.1,.7,.2,1) forwards; }
+    @keyframes burst { to { transform: translate(var(--x), var(--y)) rotate(420deg); opacity: 0; } }
+
+    .data-footer { margin-top: 18px; display: flex; justify-content: center; }
+    .reset-data { background: none; border: 0; color: #7785a9; font-size: 10px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .reset-data:hover { color: var(--danger); }
+
+    /* 문의센터 추가 */
+    .support-modal {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(3,8,22,.65);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+
+    .support-modal.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .support-card {
+      width: min(460px, 100%);
+      height: min(650px, calc(100vh - 36px));
+      display: flex;
+      flex-direction: column;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(157,193,255,.23);
+      background: linear-gradient(145deg, #172653, #0b1533);
+      box-shadow: 0 30px 80px rgba(0,0,0,.5);
+      transform: translateY(15px) scale(.97);
+      transition: .22s ease;
+    }
+
+    .support-modal.show .support-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .support-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 19px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.025);
+    }
+
+    .support-title {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .support-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #06152b;
+      background: linear-gradient(135deg, #a9f7ff, #63dcff 45%, #a08aff);
+      font-size: 18px;
+      box-shadow: 0 7px 20px rgba(85,202,255,.2);
+    }
+
+    .support-title strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .support-title small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    .support-close {
+      width: 35px;
+      height: 35px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,.035);
+      cursor: pointer;
+      font-size: 17px;
+    }
+
+    .support-close:hover {
+      color: var(--ink);
+      background: rgba(255,255,255,.09);
+    }
+
+    .support-chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 17px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .support-message {
+      max-width: 84%;
+      padding: 11px 13px;
+      border-radius: 14px;
+      font-size: 12px;
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+
+    .support-message.ai {
+      align-self: flex-start;
+      color: #dce7ff;
+      border: 1px solid rgba(174,200,255,.12);
+      background: rgba(255,255,255,.045);
+      border-bottom-left-radius: 5px;
+    }
+
+    .support-message.user {
+      align-self: flex-end;
+      color: #06152b;
+      background: linear-gradient(135deg, #a9f7ff, #63dcff);
+      border-bottom-right-radius: 5px;
+    }
+
+    .support-message.discord {
+      max-width: 100%;
+      color: #dce7ff;
+      border: 1px solid rgba(157,123,255,.28);
+      background: linear-gradient(135deg, rgba(126,96,238,.14), rgba(246,116,187,.06));
+      border-radius: 15px;
+    }
+
+    .support-input-area {
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      background: rgba(3,8,22,.28);
+    }
+
+    .support-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .support-input {
+      min-width: 0;
+      flex: 1;
+      height: 43px;
+      padding: 0 13px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      outline: none;
+      border-radius: 12px;
+      background: rgba(255,255,255,.045);
+      font-size: 12px;
+    }
+
+    .support-input:focus {
+      border-color: rgba(87,229,255,.5);
+      box-shadow: 0 0 0 3px rgba(87,229,255,.06);
+    }
+
+    .support-send {
+      width: 46px;
+      height: 43px;
+      flex: none;
+      border: 0;
+      border-radius: 12px;
+      color: #06152b;
+      background: linear-gradient(135deg, #a9f7ff, #63dcff 45%, #a08aff);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .support-send:hover {
+      filter: brightness(1.08);
+    }
+
+    .discord-button {
+      width: 100%;
+      min-height: 42px;
+      margin-top: 9px;
+      border: 1px solid rgba(157,123,255,.35);
+      border-radius: 11px;
+      color: #eee9ff;
+      background: rgba(126,96,238,.18);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      transition: .2s;
+    }
+
+    .discord-button:hover {
+      background: rgba(126,96,238,.3);
+      border-color: rgba(157,123,255,.65);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 245px minmax(0, 1fr); }
+      .opponent { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 14px; align-items: start; }
+      .opponent-title { margin: 0; } .ai-card { margin: 0; } .difficulty { grid-template-columns: repeat(3, 1fr); }
+      .difficulty-button { grid-template-columns: 8px 1fr; } .difficulty-button em { display: none; }
+      .stat-grid { margin-top: 0; } .streak-box { display: none; }
+      .badges-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 670px) {
+      .app { width: min(100% - 22px, 530px); padding-top: 15px; }
+      .topbar { margin-bottom: 14px; } .layout { display: flex; flex-direction: column; } .profile, .game-card, .opponent { width: 100%; }
+      .profile { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; } .profile > .eyebrow, .profile > .profile-top, .profile > .progress-meta, .profile > .progress-track, .profile > .rank-note { grid-column: 1 / -1; }
+      .profile .mini-divider { display: none; } .profile .section-label { align-self: end; margin-top: 6px; } .legend { padding-top: 3px; }
+      .game-card { min-height: 0; padding: 17px 14px 19px; } .board { gap: 7px; padding: 8px; border-radius: 20px; } .cell { border-radius: 13px; }
+      .opponent { display: block; padding: 17px; } .opponent-title { margin-bottom: 12px; } .ai-card { margin-bottom: 11px; } .difficulty { grid-template-columns: 1fr; }
+      .difficulty-button { grid-template-columns: 10px 1fr auto; } .difficulty-button em { display: block; } .stat-grid { margin-top: 15px; } .streak-box { display: flex; }
+      .badges-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 390px) {
+      .brand-name { font-size: 14px; } .top-actions { gap: 6px; } .icon-button { width: 37px; height: 37px; }
+      .profile { padding: 18px; } .cell { font-size: 46px; } .board-footer { gap: 6px; } .primary-button { padding: 0 13px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">×</div>
+        <div class="brand-name">TaekKkuTu<small>틱택토 끄투는 두 플레이어가 번갈아 말을 놓으며 3칸을 먼저 완성하는 클래식 보드게임입니다.
+빠른 판단과 전략으로 상대를 이겨보세요!</small></div>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-button active" id="soundToggle" aria-label="효과음 켜기/끄기" title="효과음">♬</button>
+
+        <!-- 문의센터 버튼 추가 -->
+        <button class="icon-button" id="supportButton" aria-label="문의센터" title="문의센터">💬</button>
+
+        <button class="icon-button" id="helpButton" aria-label="게임 도움말" title="게임 방법">?</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="profile card" aria-label="플레이어 프로필">
+        <div class="eyebrow">PLAYER PROGRESSION</div>
+        <div class="profile-top">
+          <div class="level-orb"><span id="levelNumber">1</span></div>
+          <div><div class="profile-name">User._.</div><div class="profile-rank" id="rankName">신입 탐험가</div></div>
+        </div>
+        <div class="progress-meta"><span id="xpText">0 / 90 XP</span><span id="xpPercent">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="rank-note" id="rankNote">한 판을 시작하고 첫 XP를 획득하세요.</div>
+        <div class="mini-divider"></div>
+        <div>
+          <p class="section-label">내 기호</p>
+          <div class="symbol-switch">
+            <button class="symbol-option selected" data-symbol="X"><span>×</span> 선공</button>
+            <button class="symbol-option" data-symbol="O"><span>○</span> 후공</button>
+          </div>
+        </div>
+        <div>
+          <p class="section-label">현재 성장 보상</p>
+          <div class="legend">
+            <div class="legend-row"><span><i class="dot" style="background:var(--green)"></i>승리</span><b id="winReward">+24 XP</b></div>
+            <div class="legend-row"><span><i class="dot" style="background:var(--orange)"></i>무승부</span><b id="drawReward">+10 XP</b></div>
+            <div class="legend-row"><span><i class="dot" style="background:var(--pink)"></i>패배</span><b id="lossReward">+5 XP</b></div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="game-card card" aria-label="틱택토 게임">
+        <div class="arena-head">
+          <div><div class="eyebrow">MATCH ARENA</div><p class="arena-caption">3개를 먼저 연결하면 승리</p></div>
+          <div class="round-pill" id="difficultyPill">훈련 모드</div>
+        </div>
+        <div class="status" aria-live="polite">
+          <h2 id="statusTitle"><span class="turn-dot"></span>당신의 차례</h2>
+          <p id="statusText">빈 칸을 선택해 첫 수를 두세요.</p>
+        </div>
+        <div class="board-wrap">
+          <div class="board" id="board" role="grid" aria-label="틱택토 판">
+            <button class="cell" data-index="0" role="gridcell" aria-label="첫째 줄 첫째 칸"></button>
+            <button class="cell" data-index="1" role="gridcell" aria-label="첫째 줄 둘째 칸"></button>
+            <button class="cell" data-index="2" role="gridcell" aria-label="첫째 줄 셋째 칸"></button>
+            <button class="cell" data-index="3" role="gridcell" aria-label="둘째 줄 첫째 칸"></button>
+            <button class="cell" data-index="4" role="gridcell" aria-label="가운데 칸"></button>
+            <button class="cell" data-index="5" role="gridcell" aria-label="둘째 줄 셋째 칸"></button>
+            <button class="cell" data-index="6" role="gridcell" aria-label="셋째 줄 첫째 칸"></button>
+            <button class="cell" data-index="7" role="gridcell" aria-label="셋째 줄 둘째 칸"></button>
+            <button class="cell" data-index="8" role="gridcell" aria-label="셋째 줄 셋째 칸"></button>
+          </div>
+          <div class="board-footer">
+            <button class="primary-button" id="newGame">새 대국</button>
+            <button class="ghost-button" id="clearBoard">다시 두기</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="opponent card" aria-label="상대 및 전적">
+        <div class="opponent-title"><h2>서버 상태</h2><span class="signal"><i></i>ONLINE</span></div>
+        <div class="ai-card">
+          <div class="ai-label">ORBIT ENGINE</div>
+          <div class="ai-name" id="aiName">NOVA</div>
+          <p class="ai-info" id="aiDescription">느긋한 초보 서버. 기본기를 익히기에 좋아요.</p>
+        </div>
+        <div aria-label="자동 성장 경로">
+          <p class="evolution-note">플레이어 레벨에 맞춰 서버가 변경됩니다.</p>
+          <div class="evolution-list">
+            <div class="evolution-step" data-stage="tutorial"><span class="evolution-icon">○</span><span><strong>BUBBLE · 튜토리얼</strong><small>거의 랜덤으로 둡니다</small></span><em>LV 1–2</em></div>
+            <div class="evolution-step" data-stage="rookie"><span class="evolution-icon">✦</span><span><strong>NOVA · 견습</strong><small>가끔 이기는 수를 찾습니다</small></span><em>LV 3–4</em></div>
+            <div class="evolution-step" data-stage="tactician"><span class="evolution-icon">◆</span><span><strong>LYRA · 전략가</strong><small>실수를 노리기 시작합니다</small></span><em>LV 5–6</em></div>
+            <div class="evolution-step" data-stage="elite"><span class="evolution-icon">✧</span><span><strong>ORION · 엘리트</strong><small>상당히 날카로운 수읽기</small></span><em>LV 7–8</em></div>
+            <div class="evolution-step" data-stage="master"><span class="evolution-icon">✹</span><span><strong>ATLAS · 마스터</strong><small>최적의 수를 찾습니다</small></span><em>LV 9+</em></div>
+          </div>
+        </div>
+        <div class="stat-grid" aria-label="전적">
+          <div class="stat win"><b id="wins">0</b><span>승리</span></div>
+          <div class="stat draw"><b id="draws">0</b><span>무승부</span></div>
+          <div class="stat loss"><b id="losses">0</b><span>패배</span></div>
+        </div>
+        <div class="streak-box"><span>현재 연승</span><b><span id="streak">0</span> WIN</b></div>
+      </aside>
+    </section>
+
+    <section class="badge-vault card" aria-label="배지 보관함">
+      <div class="badge-head">
+        <div><div class="eyebrow">ACHIEVEMENT VAULT</div><h2>획득 배지</h2></div>
+        <span class="badge-count" id="badgeCount">0 / 6 획득</span>
+      </div>
+      <div class="badges-grid">
+        <div class="badge" data-badge="first_win"><div class="badge-icon">✦</div><strong>첫 별</strong><small>첫 승리를 기록</small></div>
+        <div class="badge" data-badge="triple_streak"><div class="badge-icon">▲</div><strong>해트트릭</strong><small>3연속 승리</small></div>
+        <div class="badge" data-badge="ten_streak"><div class="badge-icon">♛</div><strong>무적의 궤도</strong><small>10연속 승리</small></div>
+        <div class="badge" data-badge="arena_25"><div class="badge-icon">◈</div><strong>아레나 단골</strong><small>25판 플레이</small></div>
+        <div class="badge" data-badge="star_slayer"><div class="badge-icon">☄</div><strong>별 사냥꾼</strong><small>엘리트 격파</small></div>
+        <div class="badge" data-badge="fifty_wins"><div class="badge-icon">✹</div><strong>은하 챔피언</strong><small>누적 50승</small></div>
+      </div>
+    </section>
+
+    <div class="data-footer"><button class="reset-data" id="resetData">저장된 기록 초기화</button></div>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="burst" id="burst"></div>
+
+  <div class="modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal-card">
+      <div class="result-icon" id="resultIcon">✦</div>
+      <h2 id="resultTitle">승리!</h2>
+      <p id="resultText"></p>
+      <div class="modal-actions">
+        <button class="ghost-button" id="closeModal">판 보기</button>
+        <button class="primary-button" id="playAgain">다음 대국</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 문의센터 -->
+  <div class="support-modal" id="supportModal" role="dialog" aria-modal="true" aria-labelledby="supportTitle">
+    <div class="support-card">
+
+      <div class="support-header">
+        <div class="support-title">
+          <div class="support-icon">💬</div>
+          <div>
+            <strong id="supportTitle">TaekKkuTu 문의센터</strong>
+            <small>AI 상담 도우미 · ONLINE</small>
+          </div>
+        </div>
+        <button class="support-close" id="supportClose" aria-label="문의센터 닫기">×</button>
+      </div>
+
+      <div class="support-chat" id="supportChat">
+        <div class="support-message ai">
+          안녕하세요! <b>택끄투 AI 문의센터</b>입니다. 😊<br><br>
+          게임 이용 중 궁금한 점이나 문제가 있다면 편하게 말씀해주세요.
+          <br><br>
+          예시: <b>게임 방법</b>, <b>XP</b>, <b>레벨</b>, <b>AI</b>, <b>오류</b>, <b>문의</b>
+        </div>
+      </div>
+
+      <div class="support-input-area">
+        <div class="support-input-row">
+          <input
+            type="text"
+            class="support-input"
+            id="supportInput"
+            placeholder="문의 내용을 입력해주세요..."
+            maxlength="300"
+            autocomplete="off"
+          >
+          <button class="support-send" id="supportSend">➤</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "orbit-tictactoe-ai.v1";
+      var LEVELS = [
+        { xp: 0, name: "신입 탐험가" },
+        { xp: 90, name: "초보 전술가" },
+        { xp: 230, name: "별빛 전략가" },
+        { xp: 430, name: "궤도 지휘관" },
+        { xp: 700, name: "네온 마스터" },
+        { xp: 1040, name: "성운 설계자" },
+        { xp: 1450, name: "초신성 베테랑" },
+        { xp: 1950, name: "오로라 챔피언" },
+        { xp: 2550, name: "은하 전설" },
+        { xp: 3400, name: "오빗 그랜드마스터" }
+      ];
+      var AI_STAGES = {
+        tutorial: { rank: 1, ai: "BUBBLE", description: "튜토리얼 봇이에요. 거의 랜덤으로 두니 편하게 감을 익혀보세요.", rewards: { win: 28, draw: 10, loss: 5 }, pill: "튜토리얼 · BUBBLE", brain: "random" },
+        rookie: { rank: 2, ai: "NOVA", description: "별빛 전략가 이상 유저들의 구역 서버에요. 방심은 금물!", rewards: { win: 34, draw: 14, loss: 6 }, pill: "견습 · NOVA", brain: "light" },
+        tactician: { rank: 3, ai: "LYRA", description: "이제 빈틈을 찾아 압박합니다. 한 수 앞을 읽어보세요.", rewards: { win: 46, draw: 18, loss: 8 }, pill: "전략가 · LYRA", brain: "medium" },
+        elite: { rank: 4, ai: "ORION", description: "상당히 날카로운 엘리트 서버예요. 실수 하나가 승부를 가릅니다.", rewards: { win: 62, draw: 24, loss: 10 }, pill: "엘리트 · ORION", brain: "strong" },
+        master: { rank: 5, ai: "ATLAS", description: "최적의 수를 찾는 마스터 랭커들의 서버에 접속해 계세요.. 비길 수 있다면 대단한 대국입니다.", rewards: { win: 80, draw: 32, loss: 12 }, pill: "마스터 · ATLAS", brain: "perfect" }
+      };
+      var BADGE_NAMES = {
+        first_win: "첫 별",
+        triple_streak: "해트트릭",
+        ten_streak: "무적의 궤도",
+        arena_25: "아레나 단골",
+        star_slayer: "별 사냥꾼",
+        fifty_wins: "은하 챔피언"
+      };
+      var LINES = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+      var DEFAULT_DATA = {
+        xp: 0,
+        stats: { wins: 0, draws: 0, losses: 0, games: 0, streak: 0, bestStreak: 0 },
+        badges: {},
+        settings: { symbol: "X", sound: true }
+      };
+
+      var data = loadData();
+      var board = Array(9).fill("");
+      var phase = "player";
+      var aiTimer = null;
+      var matchNumber = 1;
+      var cells = Array.prototype.slice.call(document.querySelectorAll(".cell"));
+      var toastTimer = null;
+
+      function copyDefault() {
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+      }
+      function loadData() {
+        try {
+          var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          var base = copyDefault();
+          if (!saved || typeof saved !== "object") return base;
+          base.xp = Math.max(0, Number(saved.xp) || 0);
+          if (saved.stats && typeof saved.stats === "object") {
+            ["wins", "draws", "losses", "games", "streak", "bestStreak"].forEach(function (key) {
+              base.stats[key] = Math.max(0, Number(saved.stats[key]) || 0);
+            });
+            if (!Number(saved.stats.games)) base.stats.games = base.stats.wins + base.stats.draws + base.stats.losses;
+          }
+          if (saved.badges && typeof saved.badges === "object") {
+            Object.keys(BADGE_NAMES).forEach(function (id) {
+              if (saved.badges[id]) base.badges[id] = saved.badges[id];
+            });
+          }
+          if (saved.settings && typeof saved.settings === "object") {
+            base.settings.symbol = saved.settings.symbol === "O" ? "O" : "X";
+            base.settings.sound = saved.settings.sound !== false;
+          }
+          return base;
+        } catch (error) {
+          return copyDefault();
+        }
+      }
+      function saveData() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (error) { showToast("저장 공간을 사용할 수 없어 이번 기록만 표시합니다."); }
+      }
+      function currentLevel() {
+        var index = 0;
+        for (var i = 0; i < LEVELS.length; i += 1) {
+          if (data.xp >= LEVELS[i].xp) index = i;
+        }
+        return { number: index + 1, index: index, info: LEVELS[index] };
+      }
+      function playerMark() { return data.settings.symbol; }
+      function aiMark() { return playerMark() === "X" ? "O" : "X"; }
+      function opponent() {
+        var level = currentLevel().number;
+        if (level <= 2) return AI_STAGES.tutorial;
+        if (level <= 4) return AI_STAGES.rookie;
+        if (level <= 6) return AI_STAGES.tactician;
+        if (level <= 8) return AI_STAGES.elite;
+        return AI_STAGES.master;
+      }
+
+      function render() {
+        var level = currentLevel();
+        var next = LEVELS[level.index + 1];
+        var progress = next ? ((data.xp - level.info.xp) / (next.xp - level.info.xp)) * 100 : 100;
+        document.getElementById("levelNumber").textContent = level.number;
+        document.getElementById("rankName").textContent = level.info.name;
+        document.getElementById("progressFill").style.width = Math.max(0, Math.min(100, progress)) + "%";
+        document.getElementById("xpPercent").textContent = Math.round(progress) + "%";
+        document.getElementById("xpText").textContent = next ? data.xp + " / " + next.xp + " XP" : data.xp + " XP · MAX";
+        document.getElementById("rankNote").textContent = next ? "다음 등급까지 " + (next.xp - data.xp) + " XP 남았습니다." : "최고 등급에 도달했습니다. 멋진 전설이에요.";
+
+        var ai = opponent();
+        document.getElementById("aiName").textContent = ai.ai;
+        document.getElementById("aiDescription").textContent = ai.description;
+        document.getElementById("difficultyPill").textContent = ai.pill;
+        document.getElementById("winReward").textContent = "+" + ai.rewards.win + " XP";
+        document.getElementById("drawReward").textContent = "+" + ai.rewards.draw + " XP";
+        document.getElementById("lossReward").textContent = "+" + ai.rewards.loss + " XP";
+        document.getElementById("wins").textContent = data.stats.wins;
+        document.getElementById("draws").textContent = data.stats.draws;
+        document.getElementById("losses").textContent = data.stats.losses;
+        document.getElementById("streak").textContent = data.stats.streak;
+        document.getElementById("soundToggle").classList.toggle("active", data.settings.sound);
+        document.getElementById("soundToggle").textContent = data.settings.sound ? "♬" : "♩";
+
+        document.querySelectorAll(".symbol-option").forEach(function (button) {
+          button.classList.toggle("selected", button.dataset.symbol === playerMark());
+        });
+        document.querySelectorAll(".evolution-step").forEach(function (step) {
+          var stage = AI_STAGES[step.dataset.stage];
+          step.classList.toggle("active", stage.rank === ai.rank);
+          step.classList.toggle("cleared", stage.rank < ai.rank);
+        });
+        var unlockedBadges = Object.keys(BADGE_NAMES).filter(function (id) { return Boolean(data.badges[id]); }).length;
+        document.getElementById("badgeCount").textContent = unlockedBadges + " / " + Object.keys(BADGE_NAMES).length + " 획득";
+        document.querySelectorAll(".badge").forEach(function (badge) {
+          badge.classList.toggle("unlocked", Boolean(data.badges[badge.dataset.badge]));
+        });
+
+        cells.forEach(function (cell, index) {
+          var mark = board[index];
+          cell.textContent = mark === "X" ? "×" : mark === "O" ? "○" : "";
+          cell.className = "cell" + (mark ? " " + mark.toLowerCase() : "");
+          cell.disabled = Boolean(mark) || phase !== "player";
+          cell.setAttribute("aria-label", (mark ? mark + " 표시됨" : "빈 칸") + ", " + (index + 1) + "번 칸");
+        });
+        document.querySelectorAll(".cell.winner").forEach(function (cell) { cell.classList.add("winner"); });
+      }
+
+      function setStatus(title, text, isAi) {
+        document.getElementById("statusTitle").innerHTML = (phase !== "over" ? '<span class="turn-dot' + (isAi ? " ai" : "") + '"></span>' : "") + title;
+        document.getElementById("statusText").textContent = text;
+      }
+      function showToast(message) {
+        var toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2500);
+      }
+      function playSound(type) {
+        if (!data.settings.sound) return;
+        try {
+          var context = new (window.AudioContext || window.webkitAudioContext)();
+          var oscillator = context.createOscillator();
+          var gain = context.createGain();
+          oscillator.type = type === "win" ? "triangle" : "sine";
+          oscillator.frequency.value = type === "win" ? 760 : type === "loss" ? 180 : 420;
+          gain.gain.setValueAtTime(.045, context.currentTime);
+          gain.gain.exponentialRampToValueAtTime(.001, context.currentTime + (type === "win" ? .22 : .1));
+          oscillator.connect(gain); gain.connect(context.destination);
+          oscillator.start(); oscillator.stop(context.currentTime + (type === "win" ? .24 : .11));
+        } catch (error) {}
+      }
+      function checkBoard(testBoard) {
+        for (var i = 0; i < LINES.length; i += 1) {
+          var line = LINES[i];
+          if (testBoard[line[0]] && testBoard[line[0]] === testBoard[line[1]] && testBoard[line[0]] === testBoard[line[2]]) {
+            return { winner: testBoard[line[0]], line: line };
+          }
+        }
+        return testBoard.every(function (cell) { return cell; }) ? { winner: "draw", line: [] } : null;
+      }
+      function emptySquares(testBoard) {
+        var free = [];
+        testBoard.forEach(function (value, index) { if (!value) free.push(index); });
+        return free;
+      }
+      function randomChoice(values) { return values[Math.floor(Math.random() * values.length)]; }
+      function tacticalMove(mark) {
+        var free = emptySquares(board);
+        for (var i = 0; i < free.length; i += 1) {
+          board[free[i]] = mark;
+          var result = checkBoard(board);
+          board[free[i]] = "";
+          if (result && result.winner === mark) return free[i];
+        }
+        return null;
+      }
+      function heuristicMove() {
+        var win = tacticalMove(aiMark());
+        if (win !== null) return win;
+        var block = tacticalMove(playerMark());
+        if (block !== null) return block;
+        if (!board[4]) return 4;
+        var corners = [0, 2, 6, 8].filter(function (index) { return !board[index]; });
+        return corners.length ? randomChoice(corners) : randomChoice(emptySquares(board));
+      }
+      function minimax(testBoard, isMaximizing, depth) {
+        var result = checkBoard(testBoard);
+        if (result) {
+          if (result.winner === aiMark()) return 10 - depth;
+          if (result.winner === playerMark()) return depth - 10;
+          return 0;
+        }
+        var free = emptySquares(testBoard);
+        var best = isMaximizing ? -Infinity : Infinity;
+        for (var i = 0; i < free.length; i += 1) {
+          testBoard[free[i]] = isMaximizing ? aiMark() : playerMark();
+          var score = minimax(testBoard, !isMaximizing, depth + 1);
+          testBoard[free[i]] = "";
+          best = isMaximizing ? Math.max(best, score) : Math.min(best, score);
+        }
+        return best;
+      }
+      function perfectMove() {
+        var free = emptySquares(board);
+        var bestScore = -Infinity;
+        var bestMoves = [];
+        free.forEach(function (index) {
+          board[index] = aiMark();
+          var score = minimax(board, false, 0);
+          board[index] = "";
+          if (score > bestScore) { bestScore = score; bestMoves = [index]; }
+          else if (score === bestScore) bestMoves.push(index);
+        });
+        return randomChoice(bestMoves);
+      }
+      function chooseAiMove() {
+        var difficulty = data.settings.difficulty;
+        if (difficulty === "hard") return perfectMove();
+        if (difficulty === "normal") {
+          if (Math.random() < .73) return perfectMove();
+          return heuristicMove();
+        }
+        if (Math.random() < .34) return heuristicMove();
+        return randomChoice(emptySquares(board));
+      }
+      function makeMove(index, mark) {
+        if (board[index] || phase === "over") return false;
+        board[index] = mark;
+        playSound("move");
+        render();
+        var result = checkBoard(board);
+        if (result) finishGame(result);
+        return Boolean(result);
+      }
+      function playerMove(index) {
+        if (phase !== "player" || board[index]) return;
+        var done = makeMove(index, playerMark());
+        if (done) return;
+        phase = "ai";
+        render();
+        setStatus("상대가 생각 중이에요", "다음 수를 계산하고 있습니다.", true);
+        aiTimer = setTimeout(aiTurn, 480 + Math.random() * 260);
+      }
+      function aiTurn() {
+        if (phase !== "ai") return;
+        var move = chooseAiMove();
+        var done = makeMove(move, aiMark());
+        if (done) return;
+        phase = "player";
+        render();
+        setStatus("당신의 차례", "판을 읽고 가장 좋은 칸을 골라보세요.", false);
+      }
+      function sparkBurst() {
+        var host = document.getElementById("burst");
+        for (var i = 0; i < 28; i += 1) {
+          var spark = document.createElement("i");
+          spark.className = "spark";
+          var angle = (Math.PI * 2 * i) / 28 + Math.random() * .35;
+          var distance = 80 + Math.random() * 190;
+          spark.style.setProperty("--x", Math.cos(angle) * distance + "px");
+          spark.style.setProperty("--y", Math.sin(angle) * distance + "px");
+          spark.style.background = ["#57e5ff", "#9b7bff", "#74f2b3", "#ffc66d"][i % 4];
+          host.appendChild(spark);
+          setTimeout(function (node) { return function () { node.remove(); }; }(spark), 1000);
+        }
+      }
+      function finishGame(result) {
+        clearTimeout(aiTimer);
+        phase = "over";
+        var isWin = result.winner === playerMark();
+        var isDraw = result.winner === "draw";
+        var reward = isWin ? opponent().rewards.win : isDraw ? opponent().rewards.draw : opponent().rewards.loss;
+        var before = currentLevel().number;
+        data.xp += reward;
+        if (isWin) {
+          data.stats.wins += 1;
+          data.stats.streak += 1;
+          data.stats.bestStreak = Math.max(data.stats.bestStreak, data.stats.streak);
+          playSound("win"); sparkBurst();
+        } else if (isDraw) {
+          data.stats.draws += 1;
+          playSound("move");
+        } else {
+          data.stats.losses += 1;
+          data.stats.streak = 0;
+          playSound("loss");
+        }
+        saveData();
+        render();
+        result.line.forEach(function (index) { cells[index].classList.add("winner"); });
+        var heading = isWin ? "승리!" : isDraw ? "무승부" : "아쉽지만 다음 판에";
+        var details = isWin ? "완벽한 연결입니다. 연승을 이어가 볼까요?" : isDraw ? "팽팽한 대국이었어요. 다음 수를 노려보세요." : "좋은 경험치가 쌓였어요. 전략을 바꿔 다시 도전하세요.";
+        var after = currentLevel().number;
+        if (after > before) details = "레벨 " + after + " 달성! 새 AI 난이도도 확인해 보세요.";
+        setStatus(heading, details, false);
+        setTimeout(function () { showResult(heading, details, reward, isWin, isDraw); }, 360);
+      }
+      function showResult(title, detail, reward, isWin, isDraw) {
+        document.getElementById("resultIcon").textContent = isWin ? "✦" : isDraw ? "≈" : "◌";
+        document.getElementById("resultTitle").textContent = title;
+        document.getElementById("resultText").innerHTML = detail + "<br><span class='xp-earned'>+" + reward + " XP 획득</span>";
+        document.getElementById("resultModal").classList.add("show");
+      }
+      function closeModal() { document.getElementById("resultModal").classList.remove("show"); }
+      function startGame() {
+        clearTimeout(aiTimer);
+        closeModal();
+        board = Array(9).fill("");
+        matchNumber += 1;
+        phase = playerMark() === "X" ? "player" : "ai";
+        render();
+        document.querySelectorAll(".cell").forEach(function (cell) { cell.classList.remove("winner"); });
+        if (phase === "player") {
+          setStatus("당신의 차례", "빈 칸을 선택해 첫 수를 두세요.", false);
+        } else {
+          setStatus("상대 선공입니다 매치가 잡혔어요!", "상대가 첫 수를 고르고 있습니다.", true);
+          aiTimer = setTimeout(aiTurn, 560);
+        }
+      }
+
+      cells.forEach(function (cell) {
+        cell.addEventListener("click", function () { playerMove(Number(cell.dataset.index)); });
+      });
+      document.querySelectorAll(".symbol-option").forEach(function (button) {
+        button.addEventListener("click", function () {
+          if (data.settings.symbol === button.dataset.symbol) return;
+          data.settings.symbol = button.dataset.symbol;
+          saveData();
+          showToast(button.dataset.symbol === "X" ? "선공 X로 변경했습니다." : "후공 O로 변경했습니다.");
+          startGame();
+        });
+      });
+      document.querySelectorAll(".difficulty-button").forEach(function (button) {
+        button.addEventListener("click", function () {
+          if (button.disabled || data.settings.difficulty === button.dataset.difficulty) return;
+          data.settings.difficulty = button.dataset.difficulty;
+          saveData();
+          showToast(DIFFICULTIES[button.dataset.difficulty].name + " 유저와 대국합니다.");
+          startGame();
+        });
+      });
+      document.getElementById("newGame").addEventListener("click", startGame);
+      document.getElementById("clearBoard").addEventListener("click", startGame);
+      document.getElementById("playAgain").addEventListener("click", startGame);
+      document.getElementById("closeModal").addEventListener("click", closeModal);
+      document.getElementById("soundToggle").addEventListener("click", function () {
+        data.settings.sound = !data.settings.sound;
+        saveData(); render();
+        showToast(data.settings.sound ? "효과음을 켰습니다." : "효과음을 껐습니다.");
+      });
+      document.getElementById("helpButton").addEventListener("click", function () {
+        showToast("가로·세로·대각선으로 3개를 이으면 승리합니다. 승리할수록 XP가 쌓여 새 난이도가 열려요.");
+      });
+      document.getElementById("resetData").addEventListener("click", function () {
+        if (!window.confirm("전적, XP, 설정을 모두 초기화할까요? 이 작업은 되돌릴 수 없습니다.")) return;
+        data = copyDefault();
+        saveData();
+        matchNumber = 0;
+        showToast("저장된 기록을 초기화했습니다.");
+        startGame();
+      });
+      document.getElementById("resultModal").addEventListener("click", function (event) {
+        if (event.target === this) closeModal();
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") closeModal();
+        if (event.key === "r" && !event.ctrlKey && !event.metaKey) startGame();
+      });
+
+      /* =========================================================
+         문의센터 기능
+         ========================================================= */
+
+      var supportModal = document.getElementById("supportModal");
+      var supportButton = document.getElementById("supportButton");
+      var supportClose = document.getElementById("supportClose");
+      var supportInput = document.getElementById("supportInput");
+      var supportSend = document.getElementById("supportSend");
+      var supportChat = document.getElementById("supportChat");
+
+      function openSupport() {
+        supportModal.classList.add("show");
+        setTimeout(function () {
+          supportInput.focus();
+        }, 200);
+      }
+
+      function closeSupport() {
+        supportModal.classList.remove("show");
+      }
+
+      function addSupportMessage(message, type) {
+        var item = document.createElement("div");
+        item.className = "support-message " + type;
+        item.innerHTML = message;
+        supportChat.appendChild(item);
+        supportChat.scrollTop = supportChat.scrollHeight;
+      }
+
+      function getAIAnswer(text) {
+        var message = text.toLowerCase();
+
+        if (
+          message.includes("게임 방법") ||
+          message.includes("하는법") ||
+          message.includes("하는 법") ||
+          message.includes("방법") ||
+          message.includes("틱택토")
+        ) {
+          return "택끄투는 가로, 세로 또는 대각선으로 같은 기호 3개를 먼저 연결하면 승리하는 게임입니다. 빈 칸을 클릭해서 말을 놓아보세요!";
+        }
+
+        if (
+          message.includes("xp") ||
+          message.includes("경험치") ||
+          message.includes("경치")
+        ) {
+          return "대국이 끝나면 결과에 따라 XP를 획득합니다. 승리하면 더 많은 XP를 받고, XP가 쌓이면 레벨과 AI 상대가 변경됩니다.";
+        }
+
+        if (
+          message.includes("레벨") ||
+          message.includes("등급")
+        ) {
+          return "플레이하면서 XP를 모으면 레벨이 올라갑니다. 레벨이 높아질수록 BUBBLE → NOVA → LYRA → ORION → ATLAS 순으로 AI 상대가 변경됩니다.";
+        }
+
+        if (
+          message.includes("ai") ||
+          message.includes("상대") ||
+          message.includes("봇")
+        ) {
+          return "AI 상대는 플레이어 레벨에 따라 자동으로 변경됩니다. 초반에는 BUBBLE이 등장하고, 높은 레벨에서는 ORION과 ATLAS 같은 AI가 등장합니다.";
+        }
+
+        if (
+          message.includes("오류") ||
+          message.includes("버그") ||
+          message.includes("안돼") ||
+          message.includes("안 돼") ||
+          message.includes("문제") ||
+          message.includes("에러")
+        ) {
+          return "불편을 드려 죄송합니다. 사용 중인 기기와 함께 어떤 상황에서 문제가 발생했는지 알려주시면 확인하는 데 도움이 됩니다.";
+        }
+
+        if (
+          message.includes("기록") ||
+          message.includes("저장") ||
+          message.includes("전적")
+        ) {
+          return "게임 기록과 XP는 브라우저의 저장 공간(localStorage)에 저장됩니다. 하단의 '저장된 기록 초기화' 버튼을 누르면 기록을 초기화할 수 있습니다.";
+        }
+
+        if (
+          message.includes("소리") ||
+          message.includes("음향") ||
+          message.includes("효과음")
+        ) {
+          return "오른쪽 위의 ♬ 버튼을 눌러 효과음을 켜거나 끌 수 있습니다.";
+        }
+
+        if (
+          message.includes("문의") ||
+          message.includes("상담") ||
+          message.includes("사람") ||
+          message.includes("관리자") ||
+          message.includes("운영자")
+        ) {
+          return "제가 먼저 기본적인 문의를 도와드릴 수 있습니다. 실제 운영자 또는 상담사에게 문의하려면 아래 디스코드 연결 버튼을 이용해주세요.";
+        }
+
+        if (
+          message.includes("안녕") ||
+          message.includes("ㅎㅇ") ||
+          message.includes("hello") ||
+          message.includes("hi")
+        ) {
+          return "안녕하세요! 😊 택끄투 문의센터입니다. 궁금한 내용을 말씀해주세요!";
+        }
+
+        return "말씀해주신 내용을 확인했습니다. 기본적인 버그 및 피드백은 제가 처리할수 없습니다..";
+      }
+
+      function sendSupportMessage() {
+        var text = supportInput.value.trim();
+
+        if (!text) return;
+
+        addSupportMessage(text.replace(/</g, "&lt;").replace(/>/g, "&gt;"), "user");
+        supportInput.value = "";
+
+        setTimeout(function () {
+          addSupportMessage(getAIAnswer(text), "ai");
+
+          setTimeout(function () {
+            var currentMessages = supportChat.querySelectorAll(".support-message");
+            var lastMessage = currentMessages[currentMessages.length - 1];
+
+            if (
+              text.includes("상담") ||
+              text.includes("문의") ||
+              text.includes("운영자") ||
+              text.includes("관리자") ||
+              text.includes("사람") ||
+              text.includes("버그") ||
+              text.includes("오류") ||
+              text.includes("문제") ||
+              currentMessages.length >= 7
+            ) {
+              var discordMessage = document.createElement("div");
+              discordMessage.className = "support-message discord";
+              discordMessage.innerHTML =
+                "대화가 잘 안돼서 실제 상담사를 원하시나요?<br><br>" +
+                "그럼 <b>Discord 문의센터</b>를 통해 실제 상담을 받아보세요." +
+                "<button class='discord-button' id='discordSupportButton'>💬 실제 상담사에게 문의하기</button>";
+
+              supportChat.appendChild(discordMessage);
+              supportChat.scrollTop = supportChat.scrollHeight;
+
+              document.getElementById("discordSupportButton").addEventListener("click", function () {
+                window.open("https://discord.gg/Kxz5GQyhQq", "_blank", "noopener,noreferrer");
+              });
+            }
+          }, 500);
+        }, 450);
+      }
+
+      supportButton.addEventListener("click", openSupport);
+      supportClose.addEventListener("click", closeSupport);
+      supportSend.addEventListener("click", sendSupportMessage);
+
+      supportInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          sendSupportMessage();
+        }
+      });
+
+      supportModal.addEventListener("click", function (event) {
+        if (event.target === supportModal) {
+          closeSupport();
+        }
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closeSupport();
+        }
+      });
+
+      render();
+      startGame();
+    }());
+  </script>
+</body>
+</html>
